@@ -25,24 +25,24 @@ model Zap {
   triggerId String
   trigger   Trigger?
   actions   Action[]
-  ZapRun    ZapRun[]
+  zapRuns   ZapRun[]
 }
 
 model Trigger {
-  id        String            @id @default(uuid())
-  zapId     String            @unique
+  id        String           @id @default(uuid())
+  zapId     String           @unique
   triggerId String
-  type      AvailableTriggers @relation(fields: [triggerId], references: [id])
-  zap       Zap               @relation(fields: [zapId], references: [id])
+  type      AvailableTrigger @relation(fields: [triggerId], references: [id])
+  zap       Zap              @relation(fields: [zapId], references: [id])
 }
 
 model Action {
-  id                String          @id @default(uuid())
-  zapId             String          @unique
-  Zap               Zap             @relation(fields: [zapId], references: [id])
-  actionId          String
-  type              AvailableAction @relation(fields: [actionId], references: [id])
-  availableActionId String?
+  id           String          @id @default(uuid())
+  zapId        String
+  zap          Zap             @relation(fields: [zapId], references: [id])
+  actionId     String
+  type         AvailableAction @relation(fields: [actionId], references: [id])
+  sortingOrder Int             @default(0)
 }
 
 model AvailableAction {
@@ -51,10 +51,10 @@ model AvailableAction {
   actions Action[]
 }
 
-model AvailableTriggers {
-  id      String    @id @default(uuid())
-  name    String
-  trigger Trigger[]
+model AvailableTrigger {
+  id       String    @id @default(uuid())
+  name     String
+  triggers Trigger[]
 }
 
 model ZapRun {
@@ -62,11 +62,11 @@ model ZapRun {
   zapId        String
   metadata     Json
   zap          Zap           @relation(fields: [zapId], references: [id])
-  ZapRunOutbox ZapRunOutbox?
+  zapRunOutbox ZapRunOutbox?
 }
 
 model ZapRunOutbox {
   id       String @id @default(uuid())
   zapRunId String @unique
-  zap      ZapRun @relation(fields: [zapRunId], references: [id])
+  zapRun   ZapRun @relation(fields: [zapRunId], references: [id])
 }
