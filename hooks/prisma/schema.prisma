@@ -48,7 +48,7 @@ model Action {
 model AvailableAction {
   id      String   @id @default(uuid())
   name    String
-  actions Action[] // one-to-many relationship with Action
+  actions Action[] // One-to-many relationship with Action
 }
 
 model AvailableTrigger {
