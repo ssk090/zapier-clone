@@ -23,16 +23,16 @@ model User {
 model Zap {
   id        String   @id @default(uuid())
   triggerId String
-  trigger   Trigger?
-  actions   Action[]
-  zapRuns   ZapRun[]
+  trigger   Trigger? // Each Zap is associated with a Trigger (one to one relationship)
+  actions   Action[] // Each Zap is associated with Actions (one to many relationship)
+  zapRuns   ZapRun[] // Each Zap is associated with a ZapRun (one to many relationship)
 }
 
 model Trigger {
   id        String           @id @default(uuid())
   zapId     String           @unique
   triggerId String
-  type      AvailableTrigger @relation(fields: [triggerId], references: [id])
+  type      AvailableTrigger @relation(fields: [triggerId], references: [id]) // Each Trigger is associated with AvailableTrigger (one to many relationship)
   zap       Zap              @relation(fields: [zapId], references: [id])
 }
 
@@ -48,13 +48,13 @@ model Action {
 model AvailableAction {
   id      String   @id @default(uuid())
   name    String
-  actions Action[]
+  actions Action[] // one-to-many relationship with Action
 }
 
 model AvailableTrigger {
   id       String    @id @default(uuid())
   name     String
-  triggers Trigger[]
+  triggers Trigger[] // One-to-many relationship with Trigger
 }
 
 model ZapRun {
@@ -62,11 +62,11 @@ model ZapRun {
   zapId        String
   metadata     Json
   zap          Zap           @relation(fields: [zapId], references: [id])
-  zapRunOutbox ZapRunOutbox?
+  zapRunOutbox ZapRunOutbox? // One-to-one relationship with ZapRunOutbox
 }
 
 model ZapRunOutbox {
   id       String @id @default(uuid())
   zapRunId String @unique
-  zapRun   ZapRun @relation(fields: [zapRunId], references: [id])
+  zapRun   ZapRun @relation(fields: [zapRunId], references: [id]) // One-to-one relationship with ZapRun
 }
