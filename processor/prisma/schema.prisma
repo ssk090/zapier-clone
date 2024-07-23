@@ -18,6 +18,7 @@ model User {
   name     String
   email    String @unique
   password String
+  zaps     Zap[]
 }
 
 model Zap {
@@ -26,6 +27,8 @@ model Zap {
   trigger   Trigger? // Each Zap is associated with a Trigger (one to one relationship)
   actions   Action[] // Each Zap is associated with Actions (one to many relationship)
   zapRuns   ZapRun[] // Each Zap is associated with a ZapRun (one to many relationship)
+  User      User     @relation(fields: [userId], references: [id])
+  userId    Int
 }
 
 model Trigger {

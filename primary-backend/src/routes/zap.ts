@@ -5,18 +5,21 @@ import { prismaClient } from "../db";
 const router = Router();
 
 router.post("/", authMiddleware, async (req, res) => {
+  // @ts-ignore
+  const id: string = req.id;
   const body = req.body;
   const parsedData = zapCreateSchema.safeParse(body);
 
   if (!parsedData.success) {
-    res.status(411).json({
-      message: "Incorrect Inputs",
+    return res.status(411).json({
+      message: "Incorrect inputs",
     });
   }
 
-  await prismaClient.$transaction(async (tx) => {
+  const zapId = await prismaClient.$transaction(async (tx) => {
     const zap = await prismaClient.zap.create({
       data: {
+        userId: parseInt(id),
         triggerId: "",
         actions: {
           create: parsedData.data?.actions.map((x, index) => ({
@@ -42,15 +45,67 @@ router.post("/", authMiddleware, async (req, res) => {
         triggerId: trigger.id,
       },
     });
+
+    return zap.id;
+  });
+  return res.json({
+    zapId,
   });
 });
 
-router.get("/", authMiddleware, (req, res) => {
-  res.send("hello from zap router");
+router.get("/", authMiddleware, async (req, res) => {
+  // @ts-ignore
+  const id = req.id;
+  const zaps = await prismaClient.zap.findMany({
+    where: {
+      userId: id,
+    },
+    include: {
+      actions: {
+        include: {
+          type: true,
+        },
+      },
+      trigger: {
+        include: {
+          type: true,
+        },
+      },
+    },
+  });
+
+  return res.json({
+    zaps,
+  });
 });
 
-router.get("/:zapId", authMiddleware, (req, res) => {
-  res.send("hello from zap router");
+router.get("/:zapId", authMiddleware, async (req, res) => {
+  //@ts-ignore
+  const id = req.id;
+  const zapId = req.params.zapId;
+
+  const zap = await prismaClient.zap.findFirst({
+    where: {
+      id: zapId,
+      userId: id,
+    },
+    include: {
+      actions: {
+        include: {
+          type: true,
+        },
+      },
+      trigger: {
+        include: {
+          type: true,
+        },
+      },
+    },
+  });
+
+  return res.json({
+    zap,
+  });
 });
 
 export const zapRouter = router;
